@@ -4,7 +4,7 @@ import datetime,os,sys,gzip,shutil,ConfigParser
 from ftplib import FTP
 
 config = ConfigParser.ConfigParser()
-config.read("./bkp_sql.conf")
+config.read("/root/scripts/bkp_sql.conf")
 
 LocalDIR=config.get('conf','LocalDIR')
 RemoteDIR=config.get('conf','RemoteDIR')
