@@ -20,7 +20,7 @@ if not os.path.exists(BackupDIR):
 if not os.path.isdir(BackupDIR):
 	print "ERROR!!! It is not a directory: "+BackupDIR
 	sys.exit(1)
-
+KeepLocal=config.get('conf','KeepLocal')
 FTPHost=config.get('conf','FTPHost')
 FTPUser=config.get('conf','FTPUser')
 FTPPassword=config.get('conf','FTPPassword')
@@ -49,12 +49,7 @@ try:
 	tarGZ = tarfile.open(TARFILE,'w:gz')
 	tarGZ.add(BackupDIR)
 	tarGZ.close()
-	#f.write('tar end\n')
-	#f.close()
-	print "OK"	
 except tarfile.TarError, tarexc:
-	#f.write('exception error')
-	#f.close()
 	print tarexc
 
 
@@ -76,8 +71,9 @@ except Exception,e:
 
 rDIR=os.path.join(RemoteDIR,Y,M,D);
 ftp.cwd(rDIR)
-ftp.storbinary('STOR '+os.path.basename(TARFILE), open(TARFILE, 'rb'))
-
+result=ftp.storbinary('STOR '+os.path.basename(TARFILE), open(TARFILE, 'rb'))
+if result==0 and KeepLocal=='NO':  #delete local file only of file has copied to ftp
+	        os.remove(TARFILE) #Delete local file
 ftp.quit()
 
 print "OK"
