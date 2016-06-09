@@ -25,7 +25,13 @@ FTPHost=config.get('conf','FTPHost')
 FTPUser=config.get('conf','FTPUser')
 FTPPassword=config.get('conf','FTPPassword')
 
-
+#*********************************************************************************
+def GetFilesFromDir(dir):
+        files=[]
+        for root, directories, filenames in os.walk(dir):
+           for filename in filenames:
+                files.append(os.path.join(root,filename))
+        return files
 #*************************   Start Script ****************************************
 #Check OS name
 if not sys.platform.startswith('freebsd'):
@@ -45,12 +51,16 @@ TARFILE=os.path.join(DIR,FILE)
 
 if not os.path.exists(DIR):
         os.makedirs(DIR)
+files=GetFilesFromDir(BackupDIR)
 try:
-	tarGZ = tarfile.open(TARFILE,'w:gz')
-	tarGZ.add(BackupDIR)
-	tarGZ.close()
+        tarGZ = tarfile.open(TARFILE,'w:gz')
+        for file in files:
+                tarGZ.add(file)
+        #tarGZ.add(BackupDIR)
 except tarfile.TarError, tarexc:
-	print tarexc
+        print tarexc
+finally:
+        tarGZ.close()
 
 
 #Creating RemoteDIR structure ******************************************************
