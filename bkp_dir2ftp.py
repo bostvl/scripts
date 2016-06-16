@@ -8,7 +8,8 @@ config.read("/root/scripts/bkp_dir.conf")
 
 LocalDIR=os.path.abspath(config.get('conf','LocalDIR'))
 RemoteDIR=os.path.abspath(config.get('conf','RemoteDIR'))
-DaysForBkp=-1   
+DaysForBkp=-1
+FILE=""
 if len(sys.argv)==1:
 	BackupDIR=os.path.abspath(config.get('conf','BackupDIR'))
 elif len(sys.argv)==2:
@@ -16,6 +17,10 @@ elif len(sys.argv)==2:
 elif len(sys.argv)==3:
 	BackupDIR=os.path.abspath(sys.argv[1])
 	DaysForBkp=int(sys.argv[2])
+elif len(sys.argv)==4:
+        BackupDIR=os.path.abspath(sys.argv[1])
+        DaysForBkp=int(sys.argv[2])
+	FILE=sys.argv[3]
 else:
 	print "Incorrect number of parameters!!!"
 	print "Please try: "+__file__+" dir_to_backup [number_of_days_to_backup]" 
@@ -57,7 +62,11 @@ if DaysForBkp==-1:      #Automatic increment level based on weekday number
 print "It`s going to backup files modified for ",  DaysForBkp, " day/days"
 
 DIR=os.path.join(LocalDIR,Y,M,D)
-FILE=os.path.basename(BackupDIR)+"_"+str(DaysForBkp)+"_"+now.strftime("%Y%m%d_%H%M")+".tgz"
+if FILE=="":
+	FILE=os.path.basename(BackupDIR)+"_"+str(DaysForBkp)+"_"+now.strftime("%Y%m%d_%H%M")+".tgz"
+else:
+	FILE=FILE+"_"+str(DaysForBkp)+"_"+now.strftime("%Y%m%d_%H%M")+".tgz"
+	
 TARFILE=os.path.join(DIR,FILE)
 
 #*********    Creating local copy *************************************************
@@ -69,9 +78,9 @@ try:
         tarGZ = tarfile.open(TARFILE,'w:gz')
 	FileCount=0
         for file in files:
-		FileCount+=1
 		if DaysForBkp==0:
                 	tarGZ.add(file)
+			FileCount+=1
 #			print "adding:", file, os.stat(file)
 		else:
 			filetime=datetime.datetime.fromtimestamp(os.path.getmtime(file))
@@ -80,6 +89,7 @@ try:
 			if differ<delta:
 				print "adding:", file
 				tarGZ.add(file)
+				FileCount+=1
 except tarfile.TarError, tarexc:
         print tarexc
 finally:
