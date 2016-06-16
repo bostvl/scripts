@@ -8,11 +8,18 @@ config.read("/root/scripts/bkp_dir.conf")
 
 LocalDIR=os.path.abspath(config.get('conf','LocalDIR'))
 RemoteDIR=os.path.abspath(config.get('conf','RemoteDIR'))
-
+DaysForBkp=-1   
 if len(sys.argv)==1:
 	BackupDIR=os.path.abspath(config.get('conf','BackupDIR'))
-else:
+elif len(sys.argv)==2:
 	BackupDIR=os.path.abspath(sys.argv[1])
+elif len(sys.argv)==3:
+	BackupDIR=os.path.abspath(sys.argv[1])
+	DaysForBkp=int(sys.argv[2])
+else:
+	print "Incorrect number of parameters!!!"
+	print "Please try: "+__file__+" dir_to_backup [number_of_days_to_backup]" 
+	sys.exit(1)
 
 if not os.path.exists(BackupDIR):
 	print "ERROR!!! Directory not exixts:"+BackupDIR
@@ -24,6 +31,8 @@ KeepLocal=config.get('conf','KeepLocal')
 FTPHost=config.get('conf','FTPHost')
 FTPUser=config.get('conf','FTPUser')
 FTPPassword=config.get('conf','FTPPassword')
+
+
 
 #*********************************************************************************
 def GetFilesFromDir(dir):
@@ -42,10 +51,14 @@ now = datetime.datetime.now()
 Y=str(now.year)
 M=str(now.month)
 D=str(now.day)
-DIR=os.path.join(LocalDIR,Y,M,D)
-FILE=os.path.basename(BackupDIR)+"_"+now.strftime("%Y%m%d_%H%M")+".tgz"
-TARFILE=os.path.join(DIR,FILE)
 
+if DaysForBkp==-1:      #Automatic increment level based on weekday number
+	DaysForBkp=now.weekday() 
+print "It`s going to backup files modified for ",  DaysForBkp, " day/days"
+
+DIR=os.path.join(LocalDIR,Y,M,D)
+FILE=os.path.basename(BackupDIR)+"_"+str(DaysForBkp)+"_"+now.strftime("%Y%m%d_%H%M")+".tgz"
+TARFILE=os.path.join(DIR,FILE)
 
 #*********    Creating local copy *************************************************
 
@@ -54,13 +67,24 @@ if not os.path.exists(DIR):
 files=GetFilesFromDir(BackupDIR)
 try:
         tarGZ = tarfile.open(TARFILE,'w:gz')
+	FileCount=0
         for file in files:
-                tarGZ.add(file)
-        #tarGZ.add(BackupDIR)
+		FileCount+=1
+		if DaysForBkp==0:
+                	tarGZ.add(file)
+#			print "adding:", file, os.stat(file)
+		else:
+			filetime=datetime.datetime.fromtimestamp(os.path.getmtime(file))
+		 	delta=datetime.timedelta(days=DaysForBkp)
+			differ=now-filetime
+			if differ<delta:
+				print "adding:", file
+				tarGZ.add(file)
 except tarfile.TarError, tarexc:
         print tarexc
 finally:
         tarGZ.close()
+	print "The are ", FileCount," files backuped"
 
 
 #Creating RemoteDIR structure ******************************************************
