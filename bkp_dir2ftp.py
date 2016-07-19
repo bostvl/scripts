@@ -116,8 +116,8 @@ except Exception,e:
 rDIR=os.path.join(RemoteDIR,Y,M,D);
 ftp.cwd(rDIR)
 result=ftp.storbinary('STOR '+os.path.basename(TARFILE), open(TARFILE, 'rb'))
-if result==0 and KeepLocal=='NO':  #delete local file only of file has copied to ftp
-	        os.remove(TARFILE) #Delete local file
+if KeepLocal=='NO': 
+	os.remove(TARFILE) #Delete local file
 ftp.quit()
 
 print "OK"
