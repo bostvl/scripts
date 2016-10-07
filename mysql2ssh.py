@@ -5,12 +5,12 @@ import datetime,os,sys,gzip,shutil
 
 
 DB_HOST="localhost"
-DB_USER="mybackup"
-DB_PASSWORD="1qa2ws3ed."
+DB_USER=""
+DB_PASSWORD=""
 LOCAL_DIR="/home/bkp/"
 
 #REMOTE_USER="nixuser"
-#REMOTE_PASSWORD="Gfhjkm2016."
+#REMOTE_PASSWORD=""
 #REMOTE_HOST="192.168.102.61"
 #REMOTE_DIR="/usr/share/ftp/bkp_nix_srv/www3/mysql/"
 
